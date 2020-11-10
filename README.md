@@ -69,13 +69,8 @@ S = {}
 > - indirect left recursion
 -
     **left recursion** ::
-  $$\exists A \in V_N , \exists \alpha, s.t \space A {\Rightarrow}^+ A\alpha $$
-
-    **eliminate it** ::  
-  $$ if\space  exists \space A\rightarrow A\alpha|\beta  $$
-  $$ we\space can\space change\space it\space into\space  $$
-  $$ A \rightarrow \beta A'$$
-  $$ A' \rightarrow \alpha A' | \epsilon $$
+    ![fomula](1.jpg)
+    ![fomula](2.jpg)
 - 
   **if there exists many productions that include left recursion** \
   we should reorder if and eliminate all the productions contains left recursion 
@@ -84,10 +79,7 @@ S = {}
 
     ```
 > ***Extract the left common factor***
-> $$ A \rightarrow \alpha\beta_1 | \alpha\beta_2 $$
-> $$ change\space it\space into\space  $$
-> $$ A \rightarrow \alpha A_1 $$
-> $$ A_1 \rightarrow \beta_1 | \beta_2 $$
+![fomula](3.jpg)
 - **code as follow**
     ```
 
