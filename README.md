@@ -54,7 +54,6 @@ S = {}
 
 
 > **We use json to load the grammer of the language** 
-> for example : ***grammer.json***
 >> **V<sub>N</sub>** :: *non_terminals = {}* \
 >> **V<sub>T</sub>** :: *terminals = {}* \
 >> **S** :: *start_symbols = {}* \
@@ -63,6 +62,41 @@ S = {}
 >> &emsp; &emsp;            *{ T -> T * F | T / F | F }*, \
 >> &emsp; &emsp;            *{ F -> ( E ) | num }*</p>
     }  
+
+> ***grammer.json***
+```json
+{
+    "Type": "Grammer",
+    "non_terminals": "E T F",
+    "terminals": "+ - * / ( ) num",
+    "start_symbol": "E",
+    "productions": [
+        {
+            "left": "E",
+            "candidate": [
+                "E+T",
+                "E-T",
+                "T"
+            ]
+        },
+        {
+            "left": "T",
+            "candidate":[
+                "T*F",
+                "T/F",
+                "F"
+            ]
+        },
+        {
+            "left": "F",
+            "candidate": [
+                "(E)",
+                "num"
+            ]
+        }
+    ]
+}
+```
 
 > ***Eliminate the left recursion***
 > - direct left recursion
