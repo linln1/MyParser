@@ -2,8 +2,8 @@
 > **Pipeline**
 ![](workstream.jpg)
 
-> **Grammer Defination**
->>*context-free grammer* \
+> **grammar Defination**
+>>*context-free grammar* \
 G[s] := <V<sub>N</sub>, V<sub>T</sub>, P, S>
 
 >>V<sub>N</sub> = {} \
@@ -53,7 +53,7 @@ S = {}
     <params_declaration> -> <declaration_descriptor><declaration_notion>
 
 
-> **We use json to load the grammer of the language** 
+> **We use json to load the grammar of the language** 
 >> **V<sub>N</sub>** :: *non_terminals = {}* \
 >> **V<sub>T</sub>** :: *terminals = {}* \
 >> **S** :: *start_symbols = {}* \
@@ -63,7 +63,7 @@ S = {}
 >> &emsp; &emsp;            *{ F -> ( E ) | num }*</p>
     }  
 
-> ***grammer.json***
+> ***grammar.json***
 ```json
 {
     "Type": "Grammar",
@@ -110,9 +110,9 @@ S = {}
   we should reorder if and eliminate all the productions contains left recursion 
 - **code as follow**
     ```C
-    if(grammer.contains("production") &&
-            grammer.value("production").isArray()){
-            QJsonArray Ps = grammer["production"].toArray();
+    if(grammar.contains("production") &&
+            grammar.value("production").isArray()){
+            QJsonArray Ps = grammar["production"].toArray();
             for (int i = 0 ; i < Ps.size() ; i++) {
                 if(Ps[i].isObject()){
                     QJsonObject rule = Ps[i].toObject();
@@ -272,8 +272,55 @@ $$ follow(A) \subset follow(B)$$
 $$ Else\space if\space \beta {\nRightarrow} \epsilon $$
 $$ first(\beta) \subset follow(B) $$  -->
 ![formula](5.jpg)
+two $V_N$'s follow set may be contains each other, so the recursion programme may be nonterminable
+We notice that 
+<!-- $$ follow(A) \subset follow(B) \wedge follow(B) \subset follow(A) \Leftrightarrow follow(A) = follow(B)  $$ -->
+![formula](6.jpg)
 - code as follow
 ```C++
+    void calculate_follow(MyQString left){
+        MyQString eps;
+        eps.leftStr = "epsilon";
+        for (auto iter = productions.begin(); iter != productions.end() ; iter++) {
+            QVector<QString> candidates = iter.value();
+            for(int i = 0 ; i < candidates.size() ; i++){
+                int index = 0 ;
+                index = candidates[i].indexOf(left.leftStr);
+                for(int j = index + 1; j < candidates[i].size() ; j++){
+                    QString next = candidates[i].mid(index+1,1);
+                    if(V_T.contains(next)){
+                        follow[left].insert(next);
+                        break;
+                    }
+                    for (auto iter = first[next].begin() ; iter != first[next].end() ; iter++){
+                        follow[left].insert(*iter);
+                    }
+                    if(!first[next].contains(eps)){
+                        break;
+                    }else{
+                        follow[left].remove(eps);
+                    }
+                }
+                // A->αB | β->epsilon
+                if(iter.key().leftStr != left.leftStr && candidates[i].length() == index){
+                    follow_contains[left][iter.key()] = true;
+                    if(!follow_contains[iter.key()][left]){
+                        if(!follow_constructed[iter.key()]){
+                            calculate_follow(iter.key());
+                        }
+                        for(auto ir = follow[iter.key()].begin(); ir != follow[iter.key()].end() ; ir++){
+                            follow[left].insert(*ir);
+                        }
+
+                    }
+                    else{
+                        follow[left] = follow[iter.key()];
+                    }
+                }
+            }
+        }
+        follow_constructed[left] = true;
+    }
 
 ```
 
