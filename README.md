@@ -118,3 +118,32 @@ S = {}
     ```
 
     ```
+
+
+> ***First Set***
+<!-- $$First(\alpha) \subset Follow(A)\space , which\space A\rightarrow\alpha \space ,\space \alpha \space not\space \epsilon$$
+$$If\space \alpha \space is \space \epsilon ,\space \epsilon \in \space First(A)$$
+$$If\space \alpha \in V_T, \space First(\alpha) =\{ \alpha \}$$ -->
+![formula](4.jpg)
+- code as follow
+```C++
+
+```
+
+> ***Follow Set***
+<!-- $$if\space exsits\space A\rightarrow \alpha B\beta\space $$
+$$if\space \beta {\Rightarrow}^* \epsilon$$
+$$ Follow(A) \subset Follow(B)$$
+$$ else\space if\space \beta {\nRightarrow} \epsilon $$
+$$ First(\beta) \subset Follow(B) $$  -->
+![formula](5.jpg)
+- code as follow
+```C++
+
+```
+
+> ***LL(1) Table***
+>>
+|        LL(1)         |       terminals    |
+|       :----:         |        :----:      |
+|      non_terminals   |      productions   |
