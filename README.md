@@ -1,4 +1,7 @@
 # Parser
+> **Structure**\
+![structure](structure.jpg)
+
 > **Pipeline**
 ![](workstream.jpg)
 
@@ -168,7 +171,7 @@ S = {}
             }
     }
     ```
-![eliminate_left_recurent](eliminate_left_recurent.jpg)
+![eliminate_left_recurent](result1.jpg)
 > ***Extract the left common factor***
 ![fomula](3.jpg)
 ***Use Tire tree to find the left common factor of the Grammar***
