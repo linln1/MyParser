@@ -172,6 +172,78 @@ S = {}
 > ***Extract the left common factor***
 ![fomula](3.jpg)
 ***Use Tire tree to find the left common factor of the Grammar***
+- **data structure**
+    ```C++
+        class Tire{
+            public:
+                struct TrNode{
+                    QChar ch;
+                    bool isEnd = false;
+                    int count = 0;
+                    TrNode(){
+                        ...
+                    }
+                    TrNode(MyQChar ch, bool isEnd){
+                        ...
+                    }
+                    QMap<MyQChar, TrNode*> childs;
+                };
+
+                Tire(){
+                    root = new TrNode();
+                }
+
+                TrNode* getRoot(){
+                    return root;
+                }
+
+                void insert(QString word){
+                    ...
+                }
+
+                TrNode* searchPrefix(QString word){
+                    ...
+                }
+
+                bool search(QString word){
+                    ...
+                }
+
+                bool startwith(QString prefix){
+                    ...
+                }
+                // abc123 | abt986 | cd5777 | cd699 | e
+                // return {"ab", "cd", ""}
+                // 也就是字典树节点计数不等于一就可以
+                void searchLeftCommonFactor(TrNode* rt, QVector<QString> res_set, QString res){
+                    TrNode* tmp = rt;
+                    bool flag = false;
+                    if(tmp->isEnd || (tmp->childs.size() == 1 && tmp->childs.begin().value()->count == 1)){
+                        res_set.push_back(res);
+                        return;
+                    }
+                    for (auto it = tmp->childs.begin(); it != tmp->childs.end(); it++) {
+                        if(it.value()->count!=1){
+                            flag = true;
+                        }
+                    }
+                    if(flag == false){
+                        res_set.push_back(res);
+                        return;
+                    }
+
+                    for(auto it = tmp->childs.begin(); it != tmp->childs.end(); it++){
+                        if(it.value()->count != 1){
+                            res += it.key().ch;
+                            searchLeftCommonFactor(it.value(), res_set, res);
+                        }
+                    }
+                }
+
+            private:
+                TrNode* root;
+        };
+    ```
 - **code as follow**
     ```C++
     for(auto iter = productions.begin(); iter != productions.end(); iter++){
@@ -229,41 +301,53 @@ $$ If\space X \rightarrow Y_1 Y_2 ... Y_k Y_{k+1}...\space , \epsilon \in
 first(Y_i) (i = 1,...,k),\space first(X) = first(X) \cap \{ a \in first(Y_i) | a \not ={\epsilon} \}$$ -->
 - code as follow
 ```C++
-    void calculate_first(MyQString left){
-        MyQString eps;
-        eps.leftStr = "epsilon";
-        bool all_has_epsilon(true);
-        QVector<QString> candidates = productions[left];
+    void calculate_first(string left){
+        string eps = "epsilon";
+        vector<string> candidates = productions[left];
         for(int i = 0 ; i < candidates.size() ; i++){
-            for (int j = 0 ; j < candidates[i].length() ; j++) {
-                MyQString tmp = candidates[i].mid(j, 1);
-                if(V_T.contains(tmp)){//是终结符
-                    first[left].insert(tmp);
+            bool all_has_epsilon(true);
+            for (int j = 0 ; j < candidates[i].length(); j++) {
+                string tmp= candidates[i].substr(j, 1);
+                if(tmp=="n"){
+                    tmp = candidates[i].substr(j, 3);
+                    j+=2;
+                }
+                if(tmp == "e"){
+                    tmp = candidates[i].substr(j, 7);
+                    j+=6;
+                }
+                if(V_T.find(tmp) != V_T.end() || tmp == eps){//是终结符
+                    first_of_prod[candidates[i]].insert(tmp);
+                    all_has_epsilon = false;
                     break;
                 }
-                if(!constructed[tmp]){
+                if(!first_constructed[tmp]){
                     calculate_first(tmp);
                 }
-                if(!first[tmp].contains(eps)){
+
+                for(auto irer = first[tmp].begin(); irer != first[tmp].end() ; irer++){
+                    first_of_prod[candidates[i]].insert(*irer);
+                }
+
+                if(first[tmp].find(eps) == first[tmp].end()){
                     all_has_epsilon = false;
                     break;
                 }else{
-                    //去掉epsilon
-                    first[tmp].remove(eps);
+                    first_of_prod[candidates[i]].erase(eps);
                 }
             }
             if(all_has_epsilon){
-                first[candidates[i]].insert(eps);
+                first_of_prod[candidates[i]].insert(eps);
             }
-            for(auto iter = first[candidates[i]].begin(); iter != first[candidates[i]].end() ; iter++){
+            for(auto iter = first_of_prod[candidates[i]].begin(); iter != first_of_prod[candidates[i]].end() ; iter++){
                 first[left].insert(*iter);
             }
         }
-        constructed[left] = true;
+        first_constructed[left] = true;
     }
 
 ```
-
+![result2](result2.jpg)
 > ***follow Set***
 <!-- $$If\space X \in Start\_symbols\space ,follow(X) = follow(X) \cup \{ \$ \} $$
 $$If\space \exists \space A\rightarrow \alpha B\beta\space $$
@@ -278,43 +362,79 @@ We notice that
 ![formula](6.jpg)
 - code as follow
 ```C++
-    void calculate_follow(MyQString left){
-        MyQString eps;
-        eps.leftStr = "epsilon";
+    void calculate_follow(string left){
+        string eps;
+        eps = "epsilon";
         for (auto iter = productions.begin(); iter != productions.end() ; iter++) {
-            QVector<QString> candidates = iter.value();
+            vector<string> candidates = iter->second;
             for(int i = 0 ; i < candidates.size() ; i++){
                 int index = 0 ;
-                index = candidates[i].indexOf(left.leftStr);
-                for(int j = index + 1; j < candidates[i].size() ; j++){
-                    QString next = candidates[i].mid(index+1,1);
-                    if(V_T.contains(next)){
+                index = candidates[i].find(left); //left 有可能长度不等于1
+                if(index == -1)
+                    break;
+                for(int j = index + left.length() ; j < candidates[i].size() ; j++){
+                    //next 也有可能不是长度为1的非终结符
+                    string following;
+                    string next = candidates[i].substr(index+1,1);
+                    following  = candidates[i].substr(index+1);
+                    if(candidates[i].substr(index+2, 1) ==  "'"){
+                        next += "'";
+                        following = candidates[i].substr(index+1);
+                        index += 1;
+                    }
+                    if(next == "n"){
+                        next = candidates[i].substr(index+1, 3);
+                        index += 2;
+                    }
+                    if(next == "e"){
+                        next = candidates[i].substr(index+1, 7);
+                        index += 6;
+                    }
+
+                    if(V_T.find(next) != V_T.end()){
                         follow[left].insert(next);
                         break;
                     }
+
                     for (auto iter = first[next].begin() ; iter != first[next].end() ; iter++){
                         follow[left].insert(*iter);
                     }
-                    if(!first[next].contains(eps)){
+
+                    if(first_of_prod[following].find(eps) != first_of_prod[following].end()){
+                        if(!follow_constructed[iter->first]){
+                            calculate_follow(iter->first);
+                        }
+                        if(follow_contains[iter->first][left]){
+                            follow_contains[left][iter->first] = true;
+                            follow[left] = follow[iter->first];
+                            break;
+                        }
+                        follow[left].insert(
+                                    follow[iter->first].begin(),
+                                    follow[iter->first].end()
+                                    );
+                    }
+
+                    if(first[next].find(eps) == first[next].end()){
                         break;
                     }else{
-                        follow[left].remove(eps);
+                        follow[left].erase(eps);
                     }
                 }
                 // A->αB | β->epsilon
-                if(iter.key().leftStr != left.leftStr && candidates[i].length() == index){
-                    follow_contains[left][iter.key()] = true;
-                    if(!follow_contains[iter.key()][left]){
-                        if(!follow_constructed[iter.key()]){
-                            calculate_follow(iter.key());
+                if(iter->first != left && candidates[i].length() == (index + left.length()) ){
+                    follow_contains[left][iter->first] = true;
+                    if(!follow_contains[iter->first][left]){
+                        if(!follow_constructed[iter->first]){
+                            calculate_follow(iter->first);
                         }
-                        for(auto ir = follow[iter.key()].begin(); ir != follow[iter.key()].end() ; ir++){
+                        for(auto ir = follow[iter->first].begin(); ir != follow[iter->first].end() ; ir++){
                             follow[left].insert(*ir);
                         }
 
                     }
                     else{
-                        follow[left] = follow[iter.key()];
+                        follow[left] = follow[iter->first];
                     }
                 }
             }
@@ -322,16 +442,15 @@ We notice that
         follow_constructed[left] = true;
     }
 
+
 ```
-
+![result](result3.jpg)
 > ***LL(1) Table***
->>
-|        LL(1)         |       terminals    |
-|       :----:         |        :----:      |
-|      non_terminals   |      productions   |
+>> It's difficult to align the table ::x::
+![result](result4.jpg)
 
 
-> ***Non-recursive predictive analysis*** \
+> ***Non-recursive predictive analysis*** 
 >> Use a Symbol Stack which has $ and start_symbol at first
 ```
     +-------+
@@ -342,8 +461,14 @@ We notice that
 
 ```
 find [S,a] in LL(1) Table to get the production going to be used
+example1 :
+![result](result5.jpg)
+![result](result6.jpg)
 
+example 2 :\
+![result](result7.jpg)
+![rssult](result8.jpg)
 
-
+[To Do List]
 > ***Abstract Syntax Tree***
 >> use graphviz 2.x to visualize a AST
