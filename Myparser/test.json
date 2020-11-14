@@ -1,0 +1,31 @@
+{
+    "Type": "Grammer",
+    "non_terminals": "E T F",
+    "terminals": "+ - * / ( ) num",
+    "start_symbol": "E",
+    "production": [
+        {
+            "left": "E",
+            "candidate": [
+                "E+T",
+                "E-T",
+                "T"
+            ]
+        },
+        {
+            "left": "T",
+            "candidate":[
+                "T*F",
+                "T/F",
+                "F"
+            ]
+        },
+        {
+            "left": "F",
+            "candidate": [
+                "(E)",
+                "num"
+            ]
+        }
+    ]
+}
