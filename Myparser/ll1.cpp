@@ -20,10 +20,9 @@ void extract_left_common_factor(){
     for(auto iter = productions.begin(); iter != productions.end(); iter++){
         Tire tire;
         vector<string> candidates = iter->second;
-//        if(candidates.size() == 1){
-//            break;//只有一个候选式，就可以直接退出，不用提取公因子
-//        }
-        cout << "Construct Tire Tree by productions of :" << iter->first << " : " << endl;
+        if(candidates.size() == 1){
+            break;//只有一个候选式，就可以直接退出，不用提取公因子
+        }
         for(int i = 0; i < candidates.size(); i++){
             cout << candidates[i] << " ";
             tire.insert(candidates[i]);
@@ -65,7 +64,8 @@ void extract_left_common_factor(){
         for (auto it = newproductions.begin(); it != newproductions.end(); it++ ){
             updatePro.push_back(*it);
         }
-        productions[iter->first] = updatePro;
+        if(updatePro.size() != 0)
+            productions[iter->first] = updatePro;
     }
     return ;
 }
@@ -73,9 +73,9 @@ void extract_left_common_factor(){
 void calculate_first(string left){
     string eps = "epsilon";
     vector<string> candidates = productions[left];
-    for(int i = 0 ; i < candidates.size() ; i++){
+    for(unsigned int i = 0 ; i < candidates.size() ; i++){
         bool all_has_epsilon(true);
-        for (int j = 0 ; j < candidates[i].length(); j++) {
+        for (unsigned int j = 0 ; j < candidates[i].length(); j++) {
             string tmp= candidates[i].substr(j, 1);
             if(tmp=="n"){
                 tmp = candidates[i].substr(j, 3);
@@ -85,6 +85,10 @@ void calculate_first(string left){
                 tmp = candidates[i].substr(j, 7);
                 j+=6;
             }
+            if(j+1 < candidates[i].length() && (candidates[i][j+1] == '\'' || isDigit(candidates[i][j+1]))){
+                tmp = candidates[i].substr(j,2);
+                j+=1;
+            }
             if(V_T.find(tmp) != V_T.end() || tmp == eps){//是终结符
                 first_of_prod[candidates[i]].insert(tmp);
                 all_has_epsilon = false;
@@ -93,11 +97,9 @@ void calculate_first(string left){
             if(!first_constructed[tmp]){
                 calculate_first(tmp);
             }
-
             for(auto irer = first[tmp].begin(); irer != first[tmp].end() ; irer++){
                 first_of_prod[candidates[i]].insert(*irer);
             }
-
             if(first[tmp].find(eps) == first[tmp].end()){
                 all_has_epsilon = false;
                 break;
@@ -154,17 +156,17 @@ void calculate_follow(string left){
     eps = "epsilon";
     for (auto iter = productions.begin(); iter != productions.end() ; iter++) {
         vector<string> candidates = iter->second;
-        for(int i = 0 ; i < candidates.size() ; i++){
+        for(unsigned int i = 0 ; i < candidates.size() ; i++){
             int index = 0 ;
             index = candidates[i].find(left); //left 有可能长度不等于1
             if(index == -1)
                 break;
-            for(int j = index + left.length() ; j < candidates[i].size() ; j++){
+            for(unsigned int j = index + left.length() ; j < candidates[i].size() ; j++){
                 //next 也有可能不是长度为1的非终结符
                 string following;
                 string next = candidates[i].substr(index+1,1);
                 following  = candidates[i].substr(index+1);
-                if(candidates[i].substr(index+2, 1) ==  "'"){
+                if(candidates[i].substr(index+2, 1) ==  "'" || isDigit(candidates[i][index+2])){
                     next += "'";
                     following = candidates[i].substr(index+1);
                     index += 1;
@@ -240,7 +242,7 @@ void calculate_all_follow(){
 
 void generate_LL1_table(){
     for(auto iter = V_N.begin() ; iter != V_N.end() ; iter++){
-        for(int i = 0; i < productions[*iter].size() ; i++){
+        for(unsigned int i = 0; i < productions[*iter].size() ; i++){
             bool has_eps(false);
             for(string terminal : first_of_prod[productions[*iter][i]]){
                 if(terminal != "epsilon"){
@@ -267,7 +269,18 @@ void print_symbol(const string& s){
     cout << s;
 }
 
+void init_tokens(){
+    for(auto i = 0 ; i < tokens_type.size() ; i++){
+        tokens.push_back(getTkstr(tokens_type[i]));
+    }
+    for(auto i = 0 ; i < tokens.size() ; i++){
+        cout << tokens[i] << " " ;
+    }
+    cout << endl;
+}
+
 void parser(){
+    init_tokens();
     stack<string> symbolstack;
     pair<deque<string>, deque<string>> left_seq;
     left_seq.first = {};

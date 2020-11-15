@@ -11,11 +11,7 @@
 
 int main(int argc, char *argv[])
 {
-    //lexerinit(argc, argv);
-//    QFile files("test1.c");
-//    if(!files.open(QFile::ReadOnly|QFile::Text)){
-//        cout<<files.errorString().toStdString()<<endl;
-//
+    lexerinit(argc, argv);
 
     if(QSysInfo::productType() == "windows" ||
             QSysInfo::productType() == "winrt"){
@@ -134,38 +130,36 @@ int main(int argc, char *argv[])
             }
         }
     }
-    //extract_left_common_factor
-    //    cout<< endl << endl<<"extract the left common factor"<< endl ;
-    //    extract_left_common_factor();
-    //    int cnt = 0;
-    //    for(auto it = productions.begin(); it != productions.end(); it++){
-    //        cout << "[" << cnt <<"th rule: ]";
-    //        string val = it->first;
-    //        cout << val.leftStr.toStdString() << " -> ";
-    //        vector<string> regCandidates = it->second;//已经消除左递归的候选式
-    //        for (int i = 0 ; i < regCandidates.size() ; i++ ) {
-    //            if(i > 0){
-    //                cout<<" | ";
-    //            }
-    //            cout << regCandidates[i].toStdString();
-    //        }
-    //        cout << endl;
-    //        cnt++;
-    //    }
-    //    cout << cnt << endl;
+    extract_left_common_factor();
+    cout<< endl << endl<<"extract the left common factor"<< endl ;
+    int cnt = 0;
+    for(auto it = productions.begin(); it != productions.end(); it++){
+        cout << "[" << cnt <<"th rule: ]";
+        string val = it->first;
+        cout << val << " -> ";
+        vector<string> regCandidates = it->second;//已经消除左递归的候选式
+        for (int i = 0 ; i < regCandidates.size() ; i++ ) {
+            if(i > 0){
+                cout<<" | ";
+            }
+            cout << regCandidates[i];
+        }
+        cout << endl;
+        cnt++;
+    }
 
     //calculate First set and Follow set
 
     calculate_all_first();
-//    cout << "ALL the NON_Terminals are as follows :" << endl;
-//    for(auto it = V_N.begin() ; it != V_N.end(); it++){
-//        cout << (*it) << endl;
-//    }
+    cout << "ALL the NON_Terminals are as follows :" << endl;
+    for(auto it = V_N.begin() ; it != V_N.end(); it++){
+        cout << (*it) << endl;
+    }
 
-//    cout << "ALL the Terminals are as follows :" << endl;
-//    for(auto it = V_T.begin(); it != V_T.end() ; it++){
-//        cout << (*it) << endl;
-//    }
+    cout << "ALL the Terminals are as follows :" << endl;
+    for(auto it = V_T.begin(); it != V_T.end() ; it++){
+        cout << (*it) << endl;
+    }
 
     cout << "The start Symbol of this grammer is :" << start_symbol << endl;
 
@@ -236,33 +230,35 @@ int main(int argc, char *argv[])
         cout << LL1_table[*iter]["$"] << endl;
     }
 
-    QFile src(QDir::homePath() + "/Desktop/src.json");
-    if(!src.open(QIODevice::ReadWrite)){
-        cout<<"failure to open file!\n";
-        exit(1);
-    }
-    QJsonParseError srcjpe;
-    QJsonDocument srcJson = QJsonDocument::fromJson(src.readAll(), &srcjpe);
+//    QFile src(QDir::homePath() + "/Desktop/src.json");
+//    if(!src.open(QIODevice::ReadWrite)){
+//        cout<<"failure to open file!\n";
+//        exit(1);
+//    }
+//    QJsonParseError srcjpe;
+//    QJsonDocument srcJson = QJsonDocument::fromJson(src.readAll(), &srcjpe);
 
-    if(!srcJson.isNull() &&
-            srcjpe.error == QJsonParseError::NoError){
-        cout<<"read file successfully!\n";
-        if(srcJson.isObject()){
-            QJsonObject srcj = srcJson.object();
-            if(srcj.contains("tokens") && srcj.value("tokens").isArray()){
-                QJsonArray Tks = srcj["tokens"].toArray();
-                for (int i = 0 ; i < Tks.size() ; i++) {
-                    tokens.push_back(Tks[i].toString().toStdString());
-                    cout<<"Token is "<<Tks[i].toString().toStdString()<<endl;
-                }
-            }
-        }
-    }
+//    if(!srcJson.isNull() &&
+//            srcjpe.error == QJsonParseError::NoError){
+//        cout<<"read file successfully!\n";
+//        cout<<"Token is";
+//        if(srcJson.isObject()){
+//            QJsonObject srcj = srcJson.object();
+//            if(srcj.contains("tokens") && srcj.value("tokens").isArray()){
+//                QJsonArray Tks = srcj["tokens"].toArray();
+//                for (int i = 0 ; i < Tks.size() ; i++) {
+//                    tokens.push_back(Tks[i].toString().toStdString());
+//                    cout<<Tks[i].toString().toStdString();
+//                }
+//            }
+//        }
+//    }
+//    cout << endl;
 
     parser();
-//    QApplication a(argc, argv);
-//    MainWindow w;
-//    w.show();
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
 
     return 0; //a.exec();
 }

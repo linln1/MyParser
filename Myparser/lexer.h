@@ -171,7 +171,7 @@ extern char ch;
 extern string debuglevel;
 
 extern BUFFER* buffer;
-
+extern vector<int> tokens_type;
 extern FILE* fin;
 extern std::map<int, std::pair<char*, string>> tokenStream;
 extern std::map<string, int> CountToken;
@@ -245,6 +245,6 @@ extern void linkError(char* fmt, ...) ;
 extern void infoDisplay();
 extern int lexerinit(int, char**);
 extern void endoflexer();
-extern char* lexer();
+extern int lexer();
 
 #endif // LEXER_H

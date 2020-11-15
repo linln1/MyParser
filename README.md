@@ -112,63 +112,37 @@ S = {}
   **if there exists many productions that include left recursion** \
   we should reorder if and eliminate all the productions contains left recursion 
 - **code as follow**
-    ```C
-    if(grammar.contains("production") &&
-            grammar.value("production").isArray()){
-            QJsonArray Ps = grammar["production"].toArray();
-            for (int i = 0 ; i < Ps.size() ; i++) {
-                if(Ps[i].isObject()){
-                    QJsonObject rule = Ps[i].toObject();
-                    if(rule.contains("left") &&
-                            rule.contains("candidate") &&
-                            rule["left"].isString() &&
-                            rule["candidate"].isArray()){
-                        cout << "[" << i <<"th rule: ]" << rule["left"].toString().toStdString() << " -> ";
-                        QString leftStr = rule["left"].toString();
-                        QJsonArray candidates = rule["candidate"].toArray();
-                        QString leftExtendStr = leftStr+"'";
-
-                        MyQString left;
-                        left.leftStr = leftStr;
-
-                        MyQString leftExtend;
-                        leftExtend.leftStr = leftExtendStr;
-                        productions[left] = {};
-                        for (int j = 0 ; j < candidates.size() ; j++ ) {
-                            if(j>0){
-                                cout<<" | ";
-                            }
-                            cout<<candidates[j].toString().toStdString();
-                            if(candidates[j].toString().indexOf(leftStr) != 0){//没有左递归的表达式，利用βA' 放入容器当中
-                                if(non_terminals.contains(leftExtendStr)){
-                                    QString betaExtend = candidates[j].toString() + leftExtendStr;
-                                    productions[left].push_back(betaExtend);
-                                }
-                                else{
-                                    QString tmp = candidates[j].toString();
-                                    productions[left].push_back(tmp);
-                                }
-                            }
-                            else{//该候选式含有左递归
-                                QVector<QString>::iterator iter=find(non_terminals.begin(),non_terminals.end(), leftExtendStr);
-                                if(iter == non_terminals.end()){
-                                    non_terminals.push_back(leftExtendStr);
-                                }
-                                if(non_terminals.contains(leftExtendStr)){//已经拓展了符号
-                                    QString alpha = candidates[j].toString().mid(1);
-                                    alpha+=leftExtendStr;
-                                    productions[leftExtend].push_back(alpha);
-                                }
-                            }
-                        }
-                        QVector<QString>::iterator iter=find(non_terminals.begin(),non_terminals.end(), leftExtendStr);
-                        if(iter != non_terminals.end()){
-                            productions[leftExtend].push_back("epsilon");
-                        }
-                        cout<<endl;
-                    }
+    ```C++
+    {
+        productions[leftStr] = {};
+        for (int j = 0 ; j < candidates.size() ; j++ ) {
+            if(j>0){
+                cout<<" | ";
+            }
+            cout<<candidates[j].toString().toStdString();
+            if(candidates[j].toString().toStdString().find(leftStr) != 0){//没有左递归的表达式，利用βA' 放入容器当中    
+                if(non_terminals.find(leftExtendStr) != non_terminals.end()){
+                    string betaExtend = candidates[j].toString().toStdString() + leftExtendStr;
+                    productions[leftStr].push_back(betaExtend);
+                }
+                else{
+                    string tmp = candidates[j].toString().toStdString();
+                    productions[leftStr].push_back(tmp);
                 }
             }
+            else{//该候选式含有左递归
+                if(non_terminals.find(leftExtendStr) == non_terminals.end()){
+                    non_terminals.insert(leftExtendStr);
+                }
+                if(non_terminals.find(leftExtendStr) != non_terminals.end()){//已经拓展了符号
+                    string alpha = candidates[j].toString().toStdString().substr(1);
+                    alpha+=leftExtendStr;
+                    productions[leftExtendStr].push_back(alpha);
+                }
+            }
+    }
+    if(non_terminals.find(leftExtendStr) != non_terminals.end()){
+        productions[leftExtendStr].push_back("epsilon");
     }
     ```
 ![eliminate_left_recurent](result1.jpg)

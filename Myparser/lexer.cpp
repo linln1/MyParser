@@ -31,7 +31,7 @@ char* filename;
 char* temp = (char*)malloc(sizeof(char) * 256);
 char ch;
 string debuglevel;
-
+vector<int> tokens_type;
 BUFFER* buffer = (BUFFER*)malloc(sizeof(BUFFER));
 
 FILE* fin;
@@ -191,8 +191,12 @@ char getChar() {
 char* getTkstr(int v) {
     if (v > tkTable.len)
         return NULL;
-    if (v >= CPP_NUMBER) {
-        return (char*)tkstr.data;
+//    if (v >= CPP_OPERA && v < CPP_NUMBER){
+//        return (char*)tkstr.data;
+//    }
+    if (v >= CPP_NUMBER && v< CPP_IDENT) {
+        return "num";
+        //return (char*)tkstr.data;
     }
     return (char*)((tkWord*)tkTable.data[v])->str;
 }
@@ -1664,13 +1668,11 @@ void infoDisplay() {
 
 }
 
-int lexerinit(int argc, char** argv) {
+int lexerinit(int argc, char** argv) {// arg[0] .exe的名称 | arg[1] src.c |  arg[2] grammer.json | arg[3] debug_level |
     if (argc == 4) {
         debuglevel = argv[3];
     }
-    if (argc == 3){
 
-    }
     fin = fopen(argv[1], "rb");
     filename = (char*)malloc(sizeof(char) * strlen(argv[1]) + 1);
     memcpy(filename, argv[1], strlen(argv[1]) + 1);
@@ -1684,7 +1686,13 @@ int lexerinit(int argc, char** argv) {
     lexerInit();//符号表初始化，缓冲区初始化，缓冲区从文件中读入第一行
 
     preprocess();//预处理，去掉注释
-
+    while (ch != -1) {
+        lexerDirect();
+        if (token >= 0)
+            tokens_type.push_back(token);
+        if (over || ch == '\0')
+            break;//endoflexer();
+    }
 
 }
 
@@ -1694,11 +1702,11 @@ void endoflexer(){
     lexerCleanup();
 }
 
-char* lexer(){
+int lexer(){
     if (ch != -1) {
         lexerDirect();
         if (token >= 0)
-            return getTkstr(token);
+            return token;
         if (over || ch == '\0')
             endoflexer();
     }
