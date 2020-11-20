@@ -1,7 +1,9 @@
+#pragma once
 #ifndef DEFINES_H
 #define DEFINES_H
 
 #include <stdio.h>
+#include <queue>
 #include <stack>
 #include <set>
 #include <string>
@@ -22,12 +24,33 @@
 #include <utility>
 #include <string.h>
 #include <vector>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
 
 #define MAXKEY 1024
 #define INITSIZE 8
 #define BUFFER_MAX 256
 
 using namespace std;
+
+
+extern string start_symbol;
+extern vector<string> tokens;
+
+//extern uint unordered_map(const string &v);
+extern unordered_set<string> non_terminals;
+extern unordered_set<string> terminals;
+extern unordered_map<string, vector<string>> productions;
+extern unordered_set<string> V_T;
+extern unordered_set<string> V_N;
+extern unordered_map<string, set<string>> first;
+extern unordered_map<string, set<string>> follow;
+extern unordered_map<string, set<string>> first_of_prod;
+extern unordered_map<string, bool> first_constructed;
+extern unordered_map<string, bool> follow_constructed;
+extern unordered_map<string, unordered_map<string, bool>> follow_contains;
+extern unordered_map<string, unordered_map<string, string>> LL1_table;
 
 typedef struct TkWord {
     int code;

@@ -446,6 +446,12 @@ example 2 :\
 ![result](result7.jpg)
 ![rssult](result8.jpg)
 
+
+> **LR0 grammar** 
+> Use LR0 SLR1 table to parse the grammar
+
+![result](slr1_table.jpg)
+
 [To Do List]
 > ***Abstract Syntax Tree***
 >> use graphviz 2.x to visualize a AST

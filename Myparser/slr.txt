@@ -1,0 +1,88 @@
+The state num of the DFA is :16
+State I0 : 
+F -> .(E)
+T -> .T/F
+T -> .T*F
+F -> .num
+T -> .F
+E' -> .E
+E -> .T
+E -> .E+T
+E -> .E-T
+
+State I1 : 
+T -> T.*F
+T -> T./F
+E -> T.
+
+State I2 : 
+E -> E.-T
+E -> E.+T
+E' -> E.
+
+State I3 : 
+T -> F.
+
+State I4 : 
+F -> .(E)
+T -> .T/F
+T -> .T*F
+F -> .num
+T -> .F
+F -> (.E)
+E -> .T
+E -> .E+T
+E -> .E-T
+
+State I5 : 
+F -> num.
+
+State I6 : 
+F -> .(E)
+F -> .num
+T -> .T*F
+T -> .F
+T -> .T/F
+E -> E+.T
+
+State I7 : 
+F -> .(E)
+F -> .num
+T -> .T*F
+T -> .F
+T -> .T/F
+E -> E-.T
+
+State I8 : 
+E -> E.-T
+E -> E.+T
+F -> (E.)
+
+State I9 : 
+E -> E+T.
+T -> T.*F
+T -> T./F
+
+State I10 : 
+T -> T.*F
+E -> E-T.
+T -> T./F
+
+State I11 : 
+F -> (E).
+
+State I12 : 
+F -> .(E)
+F -> .num
+T -> T/.F
+
+State I13 : 
+F -> .num
+F -> .(E)
+T -> T*.F
+
+State I14 : 
+T -> T/F.
+
+State I15 : 
+T -> T*F.

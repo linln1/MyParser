@@ -246,5 +246,6 @@ extern void infoDisplay();
 extern int lexerinit(int, char**);
 extern void endoflexer();
 extern int lexer();
+extern void init_tokens();
 
 #endif // LEXER_H

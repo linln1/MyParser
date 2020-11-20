@@ -16,6 +16,76 @@ unordered_map<string, unordered_map<string, string>> LL1_table;
 string start_symbol;
 vector<string> tokens;
 
+void eliminate_left_recurrent(QJsonObject grammar){
+    if(grammar.contains("production") &&
+            grammar.value("production").isArray()){
+            QJsonArray Ps = grammar["production"].toArray();
+            for (int i = 0 ; i < Ps.size() ; i++) {
+                if(Ps[i].isObject()){
+                    QJsonObject rule = Ps[i].toObject();
+                    if(rule.contains("left") &&
+                            rule.contains("candidate") &&
+                            rule["left"].isString() &&
+                            rule["candidate"].isArray()){
+                        cout << "[" << i <<"th rule: ]" << rule["left"].toString().toStdString() << " -> ";
+                        string leftStr = rule["left"].toString().toStdString();
+                        QJsonArray candidates = rule["candidate"].toArray();
+                        string leftExtendStr = leftStr+"'";
+
+                        productions[leftStr] = {};
+                        for (int j = 0 ; j < candidates.size() ; j++ ) {
+                            if(j>0){
+                                cout<<" | ";
+                            }
+                            cout<<candidates[j].toString().toStdString();
+                            if(candidates[j].toString().toStdString().find(leftStr) != 0){//没有左递归的表达式，利用βA' 放入容器当中
+                                if(non_terminals.find(leftExtendStr) != non_terminals.end()){
+                                    string betaExtend = candidates[j].toString().toStdString() + leftExtendStr;
+                                    productions[leftStr].push_back(betaExtend);
+                                }
+                                else{
+                                    string tmp = candidates[j].toString().toStdString();
+                                    productions[leftStr].push_back(tmp);
+                                }
+                            }
+                            else{//该候选式含有左递归
+                                if(non_terminals.find(leftExtendStr) == non_terminals.end()){
+                                    non_terminals.insert(leftExtendStr);
+                                }
+                                if(non_terminals.find(leftExtendStr) != non_terminals.end()){//已经拓展了符号
+                                    string alpha = candidates[j].toString().toStdString().substr(1);
+                                    alpha+=leftExtendStr;
+                                    productions[leftExtendStr].push_back(alpha);
+                                }
+                            }
+                        }
+                        if(non_terminals.find(leftExtendStr) != non_terminals.end()){
+                            productions[leftExtendStr].push_back("epsilon");
+                        }
+                        cout<<endl;
+                    }
+                }
+            }
+            cout<< endl << endl<<"eliminate the left recursion"<< endl ;
+            int total = 0;
+            for(auto it = productions.begin(); it != productions.end(); it++){
+                cout << "[" << total <<"th rule: ]";
+                string val = it->first;
+                cout << val<< " -> ";
+                vector<string> regCandidates = it->second;//已经消除左递归的候选式
+                for (int i = 0 ; i < regCandidates.size() ; i++ ) {
+                    if(i > 0){
+                        cout<<" | ";
+                    }
+                    cout << regCandidates[i];
+                }
+                cout << endl;
+                total++;
+            }
+    }
+}
+
+
 void extract_left_common_factor(){
     for(auto iter = productions.begin(); iter != productions.end(); iter++){
         Tire tire;
@@ -269,17 +339,8 @@ void print_symbol(const string& s){
     cout << s;
 }
 
-void init_tokens(){
-    for(auto i = 0 ; i < tokens_type.size() ; i++){
-        tokens.push_back(getTkstr(tokens_type[i]));
-    }
-    for(auto i = 0 ; i < tokens.size() ; i++){
-        cout << tokens[i] << " " ;
-    }
-    cout << endl;
-}
 
-void parser(){
+void ll1_parser(){
     init_tokens();
     stack<string> symbolstack;
     pair<deque<string>, deque<string>> left_seq;

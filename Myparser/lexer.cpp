@@ -1668,6 +1668,16 @@ void infoDisplay() {
 
 }
 
+void init_tokens(){
+    for(auto i = 0 ; i < tokens_type.size() ; i++){
+        tokens.push_back(getTkstr(tokens_type[i]));
+    }
+    for(auto i = 0 ; i < tokens.size() ; i++){
+        cout << tokens[i] << " " ;
+    }
+    cout << endl;
+}
+
 int lexerinit(int argc, char** argv) {// arg[0] .exe的名称 | arg[1] src.c |  arg[2] grammer.json | arg[3] debug_level |
     if (argc == 4) {
         debuglevel = argv[3];
